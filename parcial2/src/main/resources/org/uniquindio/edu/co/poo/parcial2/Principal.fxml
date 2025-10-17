@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="627.0" prefWidth="919.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.uniquindio.edu.co.poo.parcial2.controller.PrincipalController"
+            stylesheets="@Styles.css">
+
+    <children>
+
+        <!-- Título principal -->
+        <Label layoutX="433.0" layoutY="22.0"
+               styleClass="title3" text="Dashboard" textFill="#181717" />
+
+        <!-- Botón Lista de Productos -->
+        <Button fx:id="btnListaProductos"
+                layoutX="86.0" layoutY="80.0"
+                text="List of products"
+                textFill="#2bc456"
+                mnemonicParsing="false"
+                onAction="#onVerLista" />
+
+        <!-- Botón Limpiar Pantalla -->
+        <Button fx:id="btnLimpiar"
+                layoutX="400.0" layoutY="80.0"
+                text="Clean screen"
+                mnemonicParsing="false"
+                onAction="#onLimpiarPantalla" />
+
+        <!-- Botón Agregar Producto -->
+        <Button fx:id="btnAgregarProducto"
+                layoutX="708.0" layoutY="80.0"
+                text="Add product"
+                mnemonicParsing="false"
+                onAction="#onCrearProducto" />
+
+        <!-- Contenedor dinámico -->
+        <AnchorPane fx:id="contentPane"
+                    layoutX="31.0" layoutY="140.0"
+                    prefHeight="450.0" prefWidth="860.0" />
+
+    </children>
+</AnchorPane>
