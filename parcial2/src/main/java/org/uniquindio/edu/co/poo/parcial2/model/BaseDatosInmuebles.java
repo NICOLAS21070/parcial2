@@ -5,14 +5,21 @@ import java.util.List;
 
 public class BaseDatosInmuebles {
 
+    // Instancia única (patrón Singleton)
     private static BaseDatosInmuebles instancia;
+
+    // Lista interna de inmuebles
     private final List<Inmueble> listaInmuebles;
 
+    // Constructor privado
     private BaseDatosInmuebles() {
         listaInmuebles = new ArrayList<>();
         cargarDatosEjemplo();
     }
 
+    /**
+     * Devuelve la única instancia de BaseDatosInmuebles.
+     */
     public static BaseDatosInmuebles getInstancia() {
         if (instancia == null) {
             instancia = new BaseDatosInmuebles();
@@ -20,6 +27,9 @@ public class BaseDatosInmuebles {
         return instancia;
     }
 
+    /**
+     * Carga datos de ejemplo iniciales.
+     */
     private void cargarDatosEjemplo() {
         listaInmuebles.add(new Casa.Builder()
                 .ciudad("Armenia")
@@ -50,27 +60,54 @@ public class BaseDatosInmuebles {
                 .build());
     }
 
-    public List<Inmueble> getListaInmuebles() {
-        return listaInmuebles;
+    // ==============================
+    // MÉTODOS PÚBLICOS DE ACCESO
+    // ==============================
+
+    /**
+     * Devuelve la lista de inmuebles.
+     * (Alias para compatibilidad con el DashboardController)
+     */
+    public static List<Inmueble> getListaInmuebles() {
+        return getInstancia().listaInmuebles;
     }
 
-    public void agregarInmueble(Inmueble inmueble) {
-        listaInmuebles.add(inmueble);
+    /**
+     * También se deja este método por compatibilidad con otros controladores.
+     */
+    public static List<Inmueble> obtenerInmuebles() {
+        return getListaInmuebles();
     }
 
-    public boolean eliminarInmueble(Inmueble inmueble) {
-        return listaInmuebles.remove(inmueble);
+    /**
+     * Agrega un inmueble a la lista.
+     */
+    public static void agregarInmueble(Inmueble inmueble) {
+        getInstancia().listaInmuebles.add(inmueble);
     }
 
-    public Inmueble buscarInmueble(String tipo, String ciudad) {
-        return listaInmuebles.stream()
+    /**
+     * Elimina un inmueble de la lista.
+     */
+    public static boolean eliminarInmueble(Inmueble inmueble) {
+        return getInstancia().listaInmuebles.remove(inmueble);
+    }
+
+    /**
+     * Busca un inmueble según tipo y ciudad.
+     */
+    public static Inmueble buscarInmueble(String tipo, String ciudad) {
+        return getInstancia().listaInmuebles.stream()
                 .filter(i -> i.getTipo().equalsIgnoreCase(tipo)
                         && i.getCiudad().equalsIgnoreCase(ciudad))
                 .findFirst()
                 .orElse(null);
     }
 
-    public int getCantidadInmuebles() {
-        return listaInmuebles.size();
+    /**
+     * Devuelve la cantidad de inmuebles en la base.
+     */
+    public static int getCantidadInmuebles() {
+        return getInstancia().listaInmuebles.size();
     }
 }

@@ -13,13 +13,14 @@ public abstract class Inmueble {
         this.ciudad = builder.ciudad;
         this.numeroHabitaciones = builder.numeroHabitaciones;
         this.numeroPisos = builder.numeroPisos;
-        this.precio = builder.precio;
+        this.precio = builder.precio; // ✅ ESTA LÍNEA FALTABA
     }
+
 
     public String getTipo() { return tipo; }
     public String getCiudad() { return ciudad; }
-    public int getNumeroHabitaciones() { return numeroHabitaciones; }
-    public int getNumeroPisos() { return numeroPisos; }
+    public int getHabitaciones() { return numeroHabitaciones; }
+    public int getPisos() { return numeroPisos; }
     public double getPrecio() { return precio; }
 
     @Override

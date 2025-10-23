@@ -2,26 +2,28 @@ package org.uniquindio.edu.co.poo.parcial2;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class App extends Application {
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/org/uniquindio/edu/co/poo/parcial2/Dashboard.fxml")
+            );
+            Parent root = loader.load();
 
-        FXMLLoader fxmlLoader = new FXMLLoader(
-                App.class.getResource("/org.uniquindio.edu.co.poo.parcial2/Principal.fxml")
-        );
-
-        if (fxmlLoader.getLocation() == null) {
-            throw new IllegalStateException("❌ No se encontró el archivo FXML: Principal.fxml");
+            Scene scene = new Scene(root);
+            stage.setTitle("Gestión de Inmuebles - Universidad del Quindío");
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("❌ Error al cargar Principal.fxml. Verifica la ruta del recurso.");
         }
-
-        Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("Parcial 2 - UQ");
-        stage.setScene(scene);
-        stage.show();
     }
 
     public static void main(String[] args) {

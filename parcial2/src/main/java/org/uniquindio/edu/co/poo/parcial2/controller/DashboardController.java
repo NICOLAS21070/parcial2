@@ -3,97 +3,113 @@ package org.uniquindio.edu.co.poo.parcial2.controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.VBox;
-import org.uniquindio.edu.co.poo.parcial2.App;
-import org.uniquindio.edu.co.poo.parcial2.model.BaseDatosInmuebles;
-import org.uniquindio.edu.co.poo.parcial2.model.Inmueble;
+import org.uniquindio.edu.co.poo.parcial2.model.*;
 
-import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class DashboardController {
-
-    @FXML private VBox contenedorPrincipal;
 
     @FXML private TableView<Inmueble> tablaInmuebles;
     @FXML private TableColumn<Inmueble, String> colTipo;
     @FXML private TableColumn<Inmueble, String> colCiudad;
-    @FXML private TableColumn<Inmueble, Integer> colHabitaciones;
     @FXML private TableColumn<Inmueble, Integer> colPisos;
+    @FXML private TableColumn<Inmueble, Integer> colHabitaciones;
     @FXML private TableColumn<Inmueble, Double> colPrecio;
 
-    @FXML private Button btnAgregar;
-    @FXML private Button btnEliminar;
+    @FXML private TextField txtTipo;
+    @FXML private TextField txtCiudad;
+    @FXML private TextField txtPisos;
+    @FXML private TextField txtHabitaciones;
+    @FXML private TextField txtPrecio;
 
-    private final BaseDatosInmuebles bd = BaseDatosInmuebles.getInstancia();
     private ObservableList<Inmueble> listaInmuebles;
 
     @FXML
-    private void initialize() {
+    public void initialize() {
+        listaInmuebles = FXCollections.observableArrayList(BaseDatosInmuebles.getListaInmuebles());
+
         colTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
         colCiudad.setCellValueFactory(new PropertyValueFactory<>("ciudad"));
-        colHabitaciones.setCellValueFactory(new PropertyValueFactory<>("numeroHabitaciones"));
-        colPisos.setCellValueFactory(new PropertyValueFactory<>("numeroPisos"));
+        colPisos.setCellValueFactory(new PropertyValueFactory<>("pisos"));
+        colHabitaciones.setCellValueFactory(new PropertyValueFactory<>("habitaciones"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
 
-        listaInmuebles = FXCollections.observableArrayList(bd.getListaInmuebles());
+        // ✅ Formatear los precios con separadores y decimales
+        NumberFormat formatoColombiano = NumberFormat.getNumberInstance(new Locale("es", "CO"));
+        formatoColombiano.setMinimumFractionDigits(2);
+        formatoColombiano.setMaximumFractionDigits(2);
+
+        colPrecio.setCellFactory(column -> new TableCell<Inmueble, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText("$ " + formatoColombiano.format(item));
+                }
+            }
+        });
+
         tablaInmuebles.setItems(listaInmuebles);
     }
 
-    // debe estar anotado con @FXML y con esta firma para que FXML lo enlace
     @FXML
     private void onAgregarInmueble() {
-        System.out.println("onAgregarInmueble invoked"); // para depuración
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource(
-                    "/org/uniquindio/edu/co/poo/parcial2/vista/FormularioInmueble.fxml"));
-            Parent formulario = loader.load();
+            String tipo = txtTipo.getText();
+            String ciudad = txtCiudad.getText();
+            int pisos = Integer.parseInt(txtPisos.getText());
+            int habitaciones = Integer.parseInt(txtHabitaciones.getText());
+            double precio = Double.parseDouble(txtPrecio.getText());
 
-            // si el formulario tiene un controlador que necesita referencia al dashboard:
-            Object controller = loader.getController();
-            try {
-                // intenta llamar setDashboardController si existe (evita acoplamiento estricto)
-                controller.getClass().getMethod("setDashboardController", DashboardController.class)
-                        .invoke(controller, this);
-            } catch (NoSuchMethodException ignored) {
-                // si no existe, no pasa nada
+            if (tipo.isEmpty() || ciudad.isEmpty()) {
+                mostrarAlerta("Campos vacíos", "Por favor llena todos los campos.");
+                return;
             }
 
-            contenedorPrincipal.getChildren().clear();
-            contenedorPrincipal.getChildren().add(formulario);
+            Inmueble nuevo = InmuebleFactory.crearInmueble(tipo, ciudad, habitaciones, pisos, precio);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo abrir el formulario: " + e.getMessage(), Alert.AlertType.ERROR);
+            listaInmuebles.add(nuevo);
+            BaseDatosInmuebles.agregarInmueble(nuevo);
+
+            limpiarCampos();
+
+        } catch (NumberFormatException e) {
+            mostrarAlerta("Error de formato", "Pisos, habitaciones y precio deben ser números válidos.");
         } catch (Exception e) {
+            mostrarAlerta("Error al agregar inmueble", e.getMessage());
             e.printStackTrace();
-            mostrarAlerta("Error inesperado", e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     private void onEliminarInmueble() {
-        Inmueble sel = tablaInmuebles.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            mostrarAlerta("Atención", "Seleccione un inmueble para eliminar", Alert.AlertType.WARNING);
-            return;
+        Inmueble seleccionado = tablaInmuebles.getSelectionModel().getSelectedItem();
+        if (seleccionado != null) {
+            listaInmuebles.remove(seleccionado);
+            BaseDatosInmuebles.eliminarInmueble(seleccionado);
+        } else {
+            mostrarAlerta("Atención", "Selecciona un inmueble para eliminar.");
         }
-        bd.eliminarInmueble(sel);
-        listaInmuebles.remove(sel);
     }
 
-    public VBox getContenedorPrincipal() {
-        return contenedorPrincipal;
+    private void limpiarCampos() {
+        txtTipo.clear();
+        txtCiudad.clear();
+        txtPisos.clear();
+        txtHabitaciones.clear();
+        txtPrecio.clear();
     }
 
-    private void mostrarAlerta(String titulo, String msg, Alert.AlertType tipo) {
-        Alert a = new Alert(tipo);
-        a.setTitle(titulo);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 }
