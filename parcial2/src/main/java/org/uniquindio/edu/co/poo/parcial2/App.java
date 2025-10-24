@@ -22,7 +22,7 @@ public class App extends Application {
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("❌ Error al cargar Principal.fxml. Verifica la ruta del recurso.");
+            System.err.println(" Error al cargar Principal.fxml. Verifica la ruta del recurso.");
         }
     }
 
