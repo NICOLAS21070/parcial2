@@ -13,9 +13,17 @@ public abstract class Inmueble {
         this.ciudad = builder.ciudad;
         this.numeroHabitaciones = builder.numeroHabitaciones;
         this.numeroPisos = builder.numeroPisos;
-        this.precio = builder.precio; // ✅ ESTA LÍNEA FALTABA
+        this.precio = builder.precio;
     }
 
+
+    protected Inmueble(Inmueble otro) {
+        this.tipo = otro.tipo;
+        this.ciudad = otro.ciudad;
+        this.numeroHabitaciones = otro.numeroHabitaciones;
+        this.numeroPisos = otro.numeroPisos;
+        this.precio = otro.precio;
+    }
 
     public String getTipo() { return tipo; }
     public String getCiudad() { return ciudad; }
@@ -25,11 +33,10 @@ public abstract class Inmueble {
 
     @Override
     public String toString() {
-        return String.format("%s - %s (%d hab, %d pisos) $%.2f",
+        return String.format("%s - %s (%d hab, %d pisos) $%,.2f",
                 tipo, ciudad, numeroHabitaciones, numeroPisos, precio);
     }
 
-    // Builder genérico (nombre BaseBuilder para evitar conflicto con javafx.util.Builder)
     public static abstract class BaseBuilder<T extends BaseBuilder<T>> {
         protected String tipo;
         protected String ciudad;
@@ -37,7 +44,6 @@ public abstract class Inmueble {
         protected int numeroPisos;
         protected double precio;
 
-        // MÉTODOS FLUENTES: deben coincidir exactamente con lo que llamas
         public T ciudad(String ciudad) {
             this.ciudad = ciudad;
             return self();

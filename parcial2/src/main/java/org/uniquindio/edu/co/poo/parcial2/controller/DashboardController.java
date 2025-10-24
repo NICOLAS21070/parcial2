@@ -18,12 +18,14 @@ public class DashboardController {
     @FXML private TableColumn<Inmueble, Integer> colPisos;
     @FXML private TableColumn<Inmueble, Integer> colHabitaciones;
     @FXML private TableColumn<Inmueble, Double> colPrecio;
+    @FXML private TableColumn<Inmueble, String> colDecorado;
 
     @FXML private TextField txtTipo;
     @FXML private TextField txtCiudad;
     @FXML private TextField txtPisos;
     @FXML private TextField txtHabitaciones;
     @FXML private TextField txtPrecio;
+    @FXML private ComboBox<String> comboDecorador;
 
     private ObservableList<Inmueble> listaInmuebles;
 
@@ -37,7 +39,17 @@ public class DashboardController {
         colHabitaciones.setCellValueFactory(new PropertyValueFactory<>("habitaciones"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
 
-        // ✅ Formatear los precios con separadores y decimales
+        // ✅ Columna decorado (usando toString() o campo interno)
+        colDecorado.setCellValueFactory(cellData -> {
+            Inmueble i = cellData.getValue();
+            if (i instanceof InmuebleDecorator) {
+                return new javafx.beans.property.SimpleStringProperty("Decorado");
+            } else {
+                return new javafx.beans.property.SimpleStringProperty("Normal");
+            }
+        });
+
+        // ✅ Formateo de precios
         NumberFormat formatoColombiano = NumberFormat.getNumberInstance(new Locale("es", "CO"));
         formatoColombiano.setMinimumFractionDigits(2);
         formatoColombiano.setMaximumFractionDigits(2);
@@ -54,6 +66,10 @@ public class DashboardController {
             }
         });
 
+        // ✅ Opciones de decorador
+        comboDecorador.setItems(FXCollections.observableArrayList("Ninguno", "Amoblado", "Garaje"));
+        comboDecorador.setValue("Ninguno");
+
         tablaInmuebles.setItems(listaInmuebles);
     }
 
@@ -65,6 +81,7 @@ public class DashboardController {
             int pisos = Integer.parseInt(txtPisos.getText());
             int habitaciones = Integer.parseInt(txtHabitaciones.getText());
             double precio = Double.parseDouble(txtPrecio.getText());
+            String decoradorSeleccionado = comboDecorador.getValue();
 
             if (tipo.isEmpty() || ciudad.isEmpty()) {
                 mostrarAlerta("Campos vacíos", "Por favor llena todos los campos.");
@@ -73,9 +90,20 @@ public class DashboardController {
 
             Inmueble nuevo = InmuebleFactory.crearInmueble(tipo, ciudad, habitaciones, pisos, precio);
 
+            // ✅ Aplicar patrón DECORATOR según selección
+            switch (decoradorSeleccionado) {
+                case "Amoblado":
+                    nuevo = new AmobladoDecorator(nuevo);
+                    break;
+                case "Garaje":
+                    nuevo = new GarajeDecorator(nuevo);
+                    break;
+                default:
+                    break;
+            }
+
             listaInmuebles.add(nuevo);
             BaseDatosInmuebles.agregarInmueble(nuevo);
-
             limpiarCampos();
 
         } catch (NumberFormatException e) {
@@ -103,6 +131,7 @@ public class DashboardController {
         txtPisos.clear();
         txtHabitaciones.clear();
         txtPrecio.clear();
+        comboDecorador.setValue("Ninguno");
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {
